@@ -37,7 +37,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'api',
+
+    # Graphene app import
+    'graphene_django',
 ]
+
+# Main Schema. Setting the schema here, there is no need to import them in the graphql url
+GRAPHENE = {
+    'SCHEMA': 'movies.schema.schema'
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
