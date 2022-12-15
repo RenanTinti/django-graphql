@@ -58,3 +58,26 @@ class Query(graphene.ObjectType):
             return Movie.objects.get(title=title)
 
         return None
+
+
+
+# ================= Aliases and Fragments ====================
+
+# Aliases: used when we want to query the same data two times, just changing the parameters of search
+# Fragments: it's a way to save the same query in a single statement, like saving a value in a variable
+# 
+# Example:
+# 
+# query {
+#   firstMovie: movie(id 1){
+#       ...movieData
+#   }
+#   secondMovie: movie(id 2){
+#       ...movieData
+#   }
+# }
+#
+# fragment movieData on MovieType {
+#   id
+#   title
+# }
