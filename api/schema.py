@@ -63,21 +63,45 @@ class Query(graphene.ObjectType):
 
 # ================= Aliases and Fragments ====================
 
-# Aliases: used when we want to query the same data two times, just changing the parameters of search
+# Aliases: used when we want to query the same data two times, just changing the parameters of search. It's basically a name for the query
 # Fragments: it's a way to save the same query in a single statement, like saving a value in a variable
-# 
+
 # Example:
-# 
-# query {
-#   firstMovie: movie(id 1){
-#       ...movieData
-#   }
-#   secondMovie: movie(id 2){
-#       ...movieData
-#   }
-# }
-#
-# fragment movieData on MovieType {
-#   id
-#   title
-# }
+
+'''
+query {
+  firstMovie: movie(id 1){
+      ...movieData
+  }
+  secondMovie: movie(id 2){
+      ...movieData
+  }
+}
+
+fragment movieData on MovieType {
+  id
+  title
+}
+'''
+
+
+# ================ Names, Variables and Directives =============
+
+# Names: every query is an anonymous function in graphql. We can name these functions to make our code more readable
+# Variables: we can also pass variables directly in the graphql function as parameters, and test some values as arguments in the "Query Variables" window below
+# Directive: it's a conditional to check if some data in our query will be shown
+
+# Example:
+
+'''
+query MovieAndDirector($id Int, $showDirector: Boolean = true){
+    movie(id: $id){
+        id
+        title
+        year
+        director @skip(if: $showDirector){
+            surname
+        }
+    }
+}
+'''
