@@ -15,8 +15,10 @@ class MovieType(DjangoObjectType):
 
     # Resolving the movie_age attribute. It can be queried as "movieAge" in graphql url. Any logic can be added inside this method
     def resolve_movie_age(self, info):
-        return "Old movie" if self.year < 2000 else "New movieS"
+        return "Old movie" if self.year < 2000 else "New movie"
 
+# GraphQL only recognizes data types in its interface, not objects. So, if we try to query the director foreign key in the Movie class, an error will occur. To fix this, we need to create a DirectorType, as shown below
+# Just writing the director foreign key in the graphql is not enough. We ha ve to tell which attibutes we want to query. In our case, we will query both name and surname
 class DirectorType(DjangoObjectType):
     class Meta:
         model = Director
@@ -27,6 +29,9 @@ class Query(graphene.ObjectType):
     # Setting all our movies object to a list of MovieType data. In the graphql interface, it will read "all_movies" as "allMovies"
     all_movies = graphene.List(MovieType)
 
+    # Setting all our directors type in a list
+    all_directors = graphene.List(DirectorType)
+
     # Setting an attribute to query a single object by its id. It is necessary to create a specific resolve method to it too
     # It is possible to pass another parameters, like the title in the exmaple below
     movie = graphene.Field(MovieType, id=graphene.Int(), title=graphene.String())
@@ -34,6 +39,10 @@ class Query(graphene.ObjectType):
     # Method to query our objects the same way we do in our views
     def resolve_all_movies(self, info, **kwargs):
         return Movie.objects.all()
+
+     # Method to query our objects the same way we do in our views
+    def resolve_all_directors(self, info, **kwargs):
+        return Director.objects.all()
 
     # Method to query a single object by its id
     def resolve_movie(self, info, **kwargs):
