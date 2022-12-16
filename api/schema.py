@@ -48,6 +48,7 @@ class Query(graphene.ObjectType):
     def resolve_movie(self, info, **kwargs):
 
         # Getting the id from the kwargs. The id needs to be passed as argument in the query in graphql interface
+        # We can use kwargs or the parameter itself (id and title). There are two ways to do this
         id = kwargs.get('id')
         title = kwargs.get('title')
 
@@ -58,6 +59,27 @@ class Query(graphene.ObjectType):
             return Movie.objects.get(title=title)
 
         return None
+
+# Class to create a movie. When we create or update some entity in our system with GraphQL, we call this a mutation
+class MovieCreateMutation(graphene.Mutation):
+
+    # The required arguments to create a new movie (it's not mandatory to be required, we just defined here)
+    class Arguments:
+        title = graphene.String(required=True)
+        year = graphene.Int(required=True)
+
+    # Creating a new field with the MovieType, and defining it as movie
+    movie = graphene.Field(MovieType)
+
+    # The method will create a new movie object ir our database, like we do in views
+    def mutate(self, info, title, year):
+        movie = Movie.objects.create(title=title, year=year)
+
+        return MovieCreateMutation(movie=movie)
+
+# The method create_movie of this generic class will call the class above, creating the movie when we pass the command and arguments in graphql
+class Mutation:
+    create_movie = MovieCreateMutation.Field()
 
 
 
@@ -70,10 +92,10 @@ class Query(graphene.ObjectType):
 
 '''
 query {
-  firstMovie: movie(id 1){
+  firstMovie: movie(id: 1){
       ...movieData
   }
-  secondMovie: movie(id 2){
+  secondMovie: movie(id: 2){
       ...movieData
   }
 }
@@ -99,9 +121,33 @@ query MovieAndDirector($id Int, $showDirector: Boolean = true){
         id
         title
         year
-        director @skip(if: $showDirector){
+        director @include(if: $showDirector){
             surname
         }
     }
+}
+'''
+
+# =================== Mutation ====================
+
+# Mutation: used when we want to create or update some object in our system
+
+'''
+mutation CreateMovie{
+  createMovie(title: "Test", year: 1999){
+    movie {
+      id
+      title
+      year
+    }
+  }
+}
+
+query QueryMovies{
+  allMovies {
+    id
+    title
+    year
+  }
 }
 '''
