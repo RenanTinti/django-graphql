@@ -77,9 +77,47 @@ class MovieCreateMutation(graphene.Mutation):
 
         return MovieCreateMutation(movie=movie)
 
+# Update class
+class MovieUpdateMutation(graphene.Mutation):
+    class Arguments:
+        id = graphene.ID(required=True)
+        title = graphene.String()
+        year = graphene.Int()
+
+    movie = graphene.Field(MovieType)
+
+    def mutate(self, info, id, title, year):
+        movie = Movie.objects.get(pk=id)
+
+        if movie.title is not None:
+            movie.title = title
+        if movie.year is not None:
+            movie.year = year
+
+        # Method save to update an object
+        movie.save()
+
+        return MovieUpdateMutation(movie=movie)
+
+# Delete class
+class MovieDeleteMutation(graphene.Mutation):
+    class Arguments:
+        id = graphene.ID(required=True)
+
+    movie = graphene.Field(MovieType)
+
+    def mutate(self, info, id):
+        movie = Movie.objects.get(pk=id)
+        movie.delete()
+
+        # Since the movie will be removed, we have to return its value as None
+        return MovieDeleteMutation(movie=None)
+
 # The method create_movie of this generic class will call the class above, creating the movie when we pass the command and arguments in graphql
 class Mutation:
     create_movie = MovieCreateMutation.Field()
+    update_movie = MovieUpdateMutation.Field()
+    delete_movie = MovieDeleteMutation.Field()
 
 
 
@@ -141,6 +179,20 @@ mutation CreateMovie{
       year
     }
   }
+}
+
+mutation UpdateMovie{
+    updateMovie(id: 5, title: "Test 2", year: 1980){
+        movie {
+            id
+        }
+    }
+}
+
+mutation DeleteMovie{
+    deleteMovie(id: 5){
+        id
+    }
 }
 
 query QueryMovies{
