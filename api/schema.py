@@ -5,6 +5,10 @@ from graphene_django.types import DjangoObjectType
 
 from .models import *
 
+# Imported library to create JSON Web Tokens
+import graphql_jwt
+from graphql_jwt.decorators import login_required
+
 # Creation of MovieType class, that is a type of data of our Movie model. The declaration is very similar to the DRF Serializers
 class MovieType(DjangoObjectType):
     class Meta:
@@ -37,7 +41,12 @@ class Query(graphene.ObjectType):
     movie = graphene.Field(MovieType, id=graphene.Int(), title=graphene.String())
 
     # Method to query our objects the same way we do in our views
+    @login_required
     def resolve_all_movies(self, info, **kwargs):
+        user = info.context.user
+        # if not user.is_authenticated:
+            # raise Exception('Auth credentials were not provided')
+
         return Movie.objects.all()
 
      # Method to query our objects the same way we do in our views
@@ -115,6 +124,8 @@ class MovieDeleteMutation(graphene.Mutation):
 
 # The method create_movie of this generic class will call the class above, creating the movie when we pass the command and arguments in graphql
 class Mutation:
+    token_auth = graphql_jwt.ObtainJSONWebToken.Field()
+
     create_movie = MovieCreateMutation.Field()
     update_movie = MovieUpdateMutation.Field()
     delete_movie = MovieDeleteMutation.Field()
@@ -200,6 +211,19 @@ query QueryMovies{
     id
     title
     year
+  }
+}
+'''
+
+# ==================== JSON Web Token =========================
+
+# Terminal: pip install django-graphql-jwt
+# Need to import the app in installed apps and configure his middlewar
+
+'''
+mutation TokenAuth{
+  tokenAuth(username: "renanoliveira", password: "admin"){
+    token
   }
 }
 '''
